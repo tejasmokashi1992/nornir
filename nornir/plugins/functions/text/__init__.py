@@ -5,7 +5,7 @@ from typing import List, Optional
 
 from colorama import Fore, Style, init
 
-from nornir.core.task import AggregatedResult, MultiResult, Result
+from nornir.core.result import AggregatedResult, MultiResult, Result
 
 
 LOCK = threading.Lock()

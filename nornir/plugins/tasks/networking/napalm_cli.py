@@ -1,9 +1,10 @@
 from typing import List
 
-from nornir.core.task import Result, Task
+from nornir.core.result import Result
+from nornir.core.task import HostTask
 
 
-def napalm_cli(task: Task, commands: List[str]) -> Result:
+def napalm_cli(task: HostTask, commands: List[str]) -> Result:
     """
     Run commands on remote devices using napalm
 

@@ -1,13 +1,14 @@
 import copy
 from typing import Any, Dict, List, Optional
 
-from nornir.core.task import Result, Task
+from nornir.core.result import Result
+from nornir.core.task import HostTask
 
 GetterOptionsDict = Optional[Dict[str, Dict[str, Any]]]
 
 
 def napalm_get(
-    task: Task,
+    task: HostTask,
     getters: List[str],
     getters_options: GetterOptionsDict = None,
     **kwargs: Any

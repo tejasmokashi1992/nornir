@@ -1,10 +1,11 @@
 from typing import Optional
 
-from nornir.core.task import Result, Task
+from nornir.core.result import Result
+from nornir.core.task import HostTask
 
 
 def napalm_configure(
-    task: Task,
+    task: HostTask,
     dry_run: Optional[bool] = None,
     filename: Optional[str] = None,
     configuration: Optional[str] = None,

@@ -1,10 +1,11 @@
 from typing import Any, List, Optional
 
-from nornir.core.task import Result, Task
+from nornir.core.result import Result
+from nornir.core.task import HostTask
 
 
 def netmiko_send_config(
-    task: Task,
+    task: HostTask,
     config_commands: Optional[List[str]] = None,
     config_file: Optional[str] = None,
     **kwargs: Any

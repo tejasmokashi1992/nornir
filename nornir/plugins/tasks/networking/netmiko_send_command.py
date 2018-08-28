@@ -1,10 +1,11 @@
 from typing import Any
 
-from nornir.core.task import Result, Task
+from nornir.core.result import Result
+from nornir.core.task import HostTask
 
 
 def netmiko_send_command(
-    task: Task, command_string: str, use_timing: bool = False, **kwargs: Any
+    task: HostTask, command_string: str, use_timing: bool = False, **kwargs: Any
 ) -> Result:
     """
     Execute Netmiko send_command method (or send_command_timing)

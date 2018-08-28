@@ -1,11 +1,12 @@
 import socket
-from typing import Optional, List
+from typing import List, Optional
 
-from nornir.core.task import Result, Task
+from nornir.core.result import Result
+from nornir.core.task import HostTask
 
 
 def tcp_ping(
-    task: Task, ports: List[int], timeout: int = 2, host: Optional[str] = None
+    task: HostTask, ports: List[int], timeout: int = 2, host: Optional[str] = None
 ) -> Result:
     """
     Tests connection to a tcp port and tries to establish a three way

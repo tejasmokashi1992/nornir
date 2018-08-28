@@ -2,7 +2,8 @@ import difflib
 import os
 from typing import List, Optional
 
-from nornir.core.task import Result, Task
+from nornir.core.result import Result
+from nornir.core.task import HostTask
 
 
 def _read_file(file: str) -> List[str]:
@@ -28,7 +29,7 @@ def _generate_diff(filename: str, content: str, append: bool) -> str:
 
 
 def write_file(
-    task: Task,
+    task: HostTask,
     filename: str,
     content: str,
     append: bool = False,

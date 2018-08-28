@@ -3,10 +3,11 @@ import subprocess
 
 
 from nornir.core.exceptions import CommandError
-from nornir.core.task import Result, Task
+from nornir.core.result import Result
+from nornir.core.task import HostTask
 
 
-def command(task: Task, command: str) -> Result:
+def command(task: HostTask, command: str) -> Result:
     """
     Executes a command locally
 

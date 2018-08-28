@@ -1,13 +1,14 @@
-from typing import Any, Optional, Dict, Callable
+from typing import Any, Callable, Dict, Optional
 
 from nornir.core.helpers import jinja_helper, merge_two_dicts
-from nornir.core.task import Result, Task
+from nornir.core.result import Result
+from nornir.core.task import HostTask
 
 FiltersDict = Optional[Dict[str, Callable[..., str]]]
 
 
 def template_string(
-    task: Task, template: str, jinja_filters: FiltersDict = None, **kwargs: Any
+    task: HostTask, template: str, jinja_filters: FiltersDict = None, **kwargs: Any
 ):
     """
     Renders a string with jinja2. All the host data is available in the tempalte

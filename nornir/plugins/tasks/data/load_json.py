@@ -1,10 +1,11 @@
 import json
 from typing import Any, Dict, MutableMapping, Type
 
-from nornir.core.task import Result, Task
+from nornir.core.result import Result
+from nornir.core.task import HostTask
 
 
-def load_json(task: Task, file: str) -> Result:
+def load_json(task: HostTask, file: str) -> Result:
     """
     Loads a json file.
 
