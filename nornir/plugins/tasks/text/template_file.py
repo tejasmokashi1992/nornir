@@ -2,13 +2,13 @@ from typing import Any, Callable, Dict, Optional
 
 from nornir.core.helpers import jinja_helper, merge_two_dicts
 from nornir.core.result import Result
-from nornir.core.task import HostTask
+from nornir.core.task import TaskExecution
 
 FiltersDict = Optional[Dict[str, Callable[..., str]]]
 
 
 def template_file(
-    task: HostTask,
+    task: TaskExecution,
     template: str,
     path: str,
     jinja_filters: FiltersDict = None,

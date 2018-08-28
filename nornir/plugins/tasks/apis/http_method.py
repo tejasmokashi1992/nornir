@@ -1,13 +1,13 @@
 from typing import Any, Optional
 
 from nornir.core.result import Result
-from nornir.core.task import HostTask
+from nornir.core.task import TaskExecution
 
 import requests
 
 
 def http_method(
-    task: Optional[HostTask] = None,
+    task: Optional[TaskExecution] = None,
     method: str = "get",
     url: str = "",
     raise_for_status: bool = True,

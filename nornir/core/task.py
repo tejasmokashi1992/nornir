@@ -3,11 +3,12 @@ import traceback
 from typing import Any, Callable, Dict, Optional, TYPE_CHECKING
 
 from nornir.core.exceptions import NornirSubTaskError
+from nornir.core.inventory import Host
 from nornir.core.result import MultiResult, Result
 
 if TYPE_CHECKING:
     from nornir.core import Nornir
-    from nornir.core.inventory import Host
+
 
 logger = logging.getLogger("nornir")
 TaskFuncType = Callable[..., Result]
@@ -56,7 +57,7 @@ class Task(object):
     def __repr__(self) -> str:
         return self.name
 
-    def start(self, host: "Host") -> MultiResult:
+    def start(self, host: Host) -> MultiResult:
         """
         Run the task for the given host.
 
@@ -69,7 +70,7 @@ class Task(object):
         Returns:
             host (:obj:`nornir.core.task.MultiResult`): Results of the task and its subtasks
         """
-        host_task = HostTask(self, host, self.nornir)
+        host_task = TaskExecution(self, host, self.nornir)
         try:
             logger.info("{}: {}: running task".format(host.name, self.name))
             r = self.task(host_task, **self.params)
@@ -101,7 +102,7 @@ class Task(object):
         return override if override is not None else self.nornir.dry_run
 
 
-class HostTask(object):
+class TaskExecution(object):
     __slots__ = "task", "host", "nornir", "results"
 
     def __init__(self, task: Task, host: "Host", nornir: "Nornir") -> None:

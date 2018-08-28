@@ -1,13 +1,13 @@
 from typing import Any, Dict, Optional
 
 from nornir.core.result import Result
-from nornir.core.task import HostTask
+from nornir.core.task import TaskExecution
 
 ValidationSourceData = Optional[Dict[str, Dict[str, Any]]]
 
 
 def napalm_validate(
-    task: HostTask,
+    task: TaskExecution,
     src: Optional[str] = None,
     validation_source: ValidationSourceData = None,
 ) -> Result:

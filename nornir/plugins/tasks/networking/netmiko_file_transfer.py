@@ -3,11 +3,11 @@ from typing import Any
 from netmiko import file_transfer
 
 from nornir.core.result import Result
-from nornir.core.task import HostTask
+from nornir.core.task import TaskExecution
 
 
 def netmiko_file_transfer(
-    task: HostTask, source_file: str, dest_file: str, **kwargs: Any
+    task: TaskExecution, source_file: str, dest_file: str, **kwargs: Any
 ) -> Result:
     """
     Execute Netmiko file_transfer method

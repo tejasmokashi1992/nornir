@@ -1,10 +1,10 @@
 from nornir.core.result import Result
-from nornir.core.task import HostTask
+from nornir.core.task import TaskExecution
 
 import ruamel.yaml
 
 
-def load_yaml(task: HostTask, file: str):
+def load_yaml(task: TaskExecution, file: str):
     """
     Loads a yaml file.
 

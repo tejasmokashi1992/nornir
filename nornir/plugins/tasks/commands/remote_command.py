@@ -1,11 +1,11 @@
 from nornir.core.exceptions import CommandError
 from nornir.core.result import Result
-from nornir.core.task import HostTask
+from nornir.core.task import TaskExecution
 
 from paramiko.agent import AgentRequestHandler
 
 
-def remote_command(task: HostTask, command: str) -> Result:
+def remote_command(task: TaskExecution, command: str) -> Result:
     """
     Executes a command remotely on the host
 

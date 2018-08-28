@@ -5,7 +5,7 @@ from typing import List, Optional
 
 from nornir.core.exceptions import CommandError
 from nornir.core.result import Result
-from nornir.core.task import HostTask
+from nornir.core.task import TaskExecution
 from nornir.plugins.tasks import commands
 
 import paramiko
@@ -24,7 +24,7 @@ def get_src_hash(filename: str) -> str:
     return sha1sum.hexdigest()
 
 
-def get_dst_hash(task: HostTask, filename: str) -> str:
+def get_dst_hash(task: TaskExecution, filename: str) -> str:
     command = "sha1sum {}".format(filename)
     try:
         result = commands.remote_command(task, command)
@@ -50,7 +50,7 @@ def remote_exists(sftp_client: paramiko.SFTPClient, f: str) -> bool:
 
 
 def compare_put_files(
-    task: HostTask, sftp_client: paramiko.SFTPClient, src: str, dst: str
+    task: TaskExecution, sftp_client: paramiko.SFTPClient, src: str, dst: str
 ) -> List[str]:
     changed = []
     if os.path.isfile(src):
@@ -73,7 +73,7 @@ def compare_put_files(
 
 
 def compare_get_files(
-    task: HostTask, sftp_client: paramiko.SFTPClient, src: str, dst: str
+    task: TaskExecution, sftp_client: paramiko.SFTPClient, src: str, dst: str
 ) -> List[str]:
     changed = []
     if stat.S_ISREG(sftp_client.stat(src).st_mode):
@@ -97,7 +97,7 @@ def compare_get_files(
 
 
 def get(
-    task: HostTask,
+    task: TaskExecution,
     scp_client: SCPClient,
     sftp_client: paramiko.SFTPClient,
     src: str,
@@ -111,7 +111,7 @@ def get(
 
 
 def put(
-    task: HostTask,
+    task: TaskExecution,
     scp_client: SCPClient,
     sftp_client: paramiko.SFTPClient,
     src: str,
@@ -125,7 +125,7 @@ def put(
 
 
 def sftp(
-    task: HostTask, src: str, dst: str, action: str, dry_run: Optional[bool] = None
+    task: TaskExecution, src: str, dst: str, action: str, dry_run: Optional[bool] = None
 ) -> Result:
     """
     Transfer files from/to the device using sftp protocol
