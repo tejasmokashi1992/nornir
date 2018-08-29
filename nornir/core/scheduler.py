@@ -15,6 +15,8 @@ class TaskScheduler(object):
         hosts: Hosts to run on
     """
 
+    __slots__ = "task", "hosts"
+
     def __init__(self, task: Task, hosts: List[Host]) -> None:
         self.task = task
         self.hosts = hosts
