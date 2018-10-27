@@ -46,3 +46,38 @@ Contributing to Nornir
 =======================
 
 If you want to help the project, the [Contribution Guidelines](https://nornir.readthedocs.io/en/develop/contributing/index.html) is the best place to start.
+
+Contributors
+============
+
+<!--- CONTRIBUTORS_LIST_STARTS_HERE  --->
+
+* [@enzzzy]
+* [@RNanney]
+* [@walidamer711]
+* Brady Lamprecht ([@bdlamprecht])
+* Brett Lykins ([@lykinsbd])
+* David Barroso ([@dbarrosop])
+* Dmitry Figol ([@dmfigol])
+* Erik Turk ([@erikturk])
+* Jeroen Simonetti ([@jsimonetti])
+* Kirk Byers ([@ktbyers])
+* Matthias Gabriel ([@MatthiasGabriel])
+* Patrick Ogenstad ([@ogenstad])
+* Simon Metzger ([@smnmtzgr])
+* Tyler Bigler ([@tyler-8])
+
+[@dbarrosop]: https://github.com/dbarrosop
+[@ogenstad]: https://github.com/ogenstad
+[@ktbyers]: https://github.com/ktbyers
+[@smnmtzgr]: https://github.com/smnmtzgr
+[@lykinsbd]: https://github.com/lykinsbd
+[@jsimonetti]: https://github.com/jsimonetti
+[@bdlamprecht]: https://github.com/bdlamprecht
+[@enzzzy]: https://github.com/enzzzy
+[@dmfigol]: https://github.com/dmfigol
+[@erikturk]: https://github.com/erikturk
+[@RNanney]: https://github.com/RNanney
+[@walidamer711]: https://github.com/walidamer711
+[@tyler-8]: https://github.com/tyler-8
+[@MatthiasGabriel]: https://github.com/MatthiasGabriel
