@@ -1,5 +1,5 @@
 from collections import UserList
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from nornir.core.configuration import Config
 from nornir.core.connections import ConnectionPlugin, Connections
@@ -23,7 +23,7 @@ class BaseAttributes(object):
         self.password = password
         self.platform = platform
 
-    def __recursive_slots__(self):
+    def __recursive_slots__(self) -> Tuple[str]:
         s = self.__slots__
         for b in self.__class__.__bases__:
             if hasattr(b, "__recursive_slots__"):

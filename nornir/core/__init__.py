@@ -1,8 +1,10 @@
 import logging
 import logging.config
 from multiprocessing.dummy import Pool
+from typing import Any, Dict, List, Optional, Type
 
 from nornir.core.configuration import Config
+from nornir.core.inventory import Host, Inventory
 from nornir.core.state import GlobalState
 from nornir.core.task import AggregatedResult, Task
 
@@ -25,21 +27,25 @@ class Nornir(object):
         config (:obj:`nornir.core.configuration.Config`): Configuration parameters
     """
 
-    def __init__(self, inventory, config=None, logger=None, data=None):
+    def __init__(
+        self,
+        inventory: Inventory,
+        config: Optional[Config] = None,
+        logger: Optional[logging.Logger] = None,
+        data: Optional[Type[GlobalState]] = None,
+    ):
         self.data = data if data is not None else GlobalState()
         self.logger = logger or logging.getLogger(__name__)
-
         self.inventory = inventory
-
         self.config = config or Config()
 
-    def __enter__(self):
+    def __enter__(self) -> "Nornir":
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         self.close_connections(on_good=True, on_failed=True)
 
-    def filter(self, *args, **kwargs):
+    def filter(self, *args: Any, **kwargs: Any) -> "Nornir":
         """
         See :py:meth:`nornir.core.inventory.Inventory.filter`
 
@@ -50,13 +56,17 @@ class Nornir(object):
         b.inventory = self.inventory.filter(*args, **kwargs)
         return b
 
-    def _run_serial(self, task, hosts, **kwargs):
+    def _run_serial(
+        self, task: Task, hosts: List[Host], **kwargs: Any
+    ) -> AggregatedResult:
         result = AggregatedResult(kwargs.get("name") or task.__name__)
         for host in hosts:
             result[host.name] = Task(task, **kwargs).start(host, self)
         return result
 
-    def _run_parallel(self, task, hosts, num_workers, **kwargs):
+    def _run_parallel(
+        self, task: Task, hosts: List[Host], **kwargs: Any
+    ) -> AggregatedResult:
         result = AggregatedResult(kwargs.get("name") or task.__name__)
 
         pool = Pool(processes=num_workers)
@@ -73,13 +83,13 @@ class Nornir(object):
 
     def run(
         self,
-        task,
-        num_workers=None,
-        raise_on_error=None,
-        on_good=True,
-        on_failed=False,
-        **kwargs,
-    ):
+        task: "Task",
+        num_workers: Optional[int] = None,
+        raise_on_error: Optional[bool] = None,
+        on_good: bool = True,
+        on_failed: bool = False,
+        **kwargs: Any,
+    ) -> AggregatedResult:
         """
         Run task over all the hosts in the inventory.
 
@@ -134,12 +144,12 @@ class Nornir(object):
             self.data.failed_hosts.update(result.failed_hosts.keys())
         return result
 
-    def dict(self):
+    def dict(self) -> Dict[str, Any]:
         """ Return a dictionary representing the object. """
         return {"data": self.data.dict(), "inventory": self.inventory.dict()}
 
-    def close_connections(self, on_good=True, on_failed=False):
-        def close_connections_task(task):
+    def close_connections(self, on_good: bool = True, on_failed: bool = False) -> None:
+        def close_connections_task(task: Task) -> None:
             task.host.close_connections()
 
         self.run(task=close_connections_task, on_good=on_good, on_failed=on_failed)
@@ -155,5 +165,5 @@ class Nornir(object):
         return v
 
     @property
-    def state(self):
+    def state(self) -> Type[GlobalState]:
         return GlobalState

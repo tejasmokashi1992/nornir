@@ -8,3 +8,4 @@ requests
 ruamel.yaml
 mypy_extensions
 pydantic
+typing_extensions

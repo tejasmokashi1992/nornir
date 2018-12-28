@@ -34,7 +34,7 @@ class LoggingConfig(object):
     __slots__ = "level", "file", "format", "to_console", "loggers"
 
     def __init__(
-        self, level: int, file_: str, format_: str, to_console: bool, loggers: List[str]
+        self, level: str, file_: str, format_: str, to_console: bool, loggers: List[str]
     ) -> None:
         self.level = level
         self.file = file_
@@ -42,7 +42,7 @@ class LoggingConfig(object):
         self.to_console = to_console
         self.loggers = loggers
 
-    def configure(self):
+    def configure(self) -> None:
         rootHandlers: List[Any] = []
         root = {
             "level": "CRITICAL" if self.loggers else self.level.upper(),
