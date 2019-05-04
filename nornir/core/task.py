@@ -1,15 +1,19 @@
 import logging
 import traceback
-from typing import Any, Optional, TYPE_CHECKING
+from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING, cast
 
 from nornir.core.exceptions import NornirExecutionError
 from nornir.core.exceptions import NornirSubTaskError
 
 if TYPE_CHECKING:
+    from nornir.core import Nornir
     from nornir.core.inventory import Host
 
 
 logger = logging.getLogger(__name__)
+
+TaskFunc = Callable[..., Any]
+Hostname = str
 
 
 class Task(object):
@@ -36,17 +40,23 @@ class Task(object):
         severity_level (logging.LEVEL): Severity level associated to the task
     """
 
-    def __init__(self, task, name=None, severity_level=logging.INFO, **kwargs):
+    def __init__(
+        self,
+        task: TaskFunc,
+        name: Optional[str] = None,
+        severity_level: int = logging.INFO,
+        **kwargs: Any
+    ) -> None:
         self.name = name or task.__name__
         self.task = task
         self.params = kwargs
         self.results = MultiResult(self.name)
         self.severity_level = severity_level
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.name
 
-    def start(self, host, nornir):
+    def start(self, host: "Host", nornir: "Nornir") -> "MultiResult":
         """
         Run the task for the given host.
 
@@ -94,7 +104,7 @@ class Task(object):
         self.results.insert(0, r)
         return self.results
 
-    def run(self, task, **kwargs):
+    def run(self, task: TaskFunc, **kwargs: Any) -> "MultiResult":
         """
         This is a utility method to call a task from within a task. For instance:
 
@@ -115,13 +125,13 @@ class Task(object):
 
         if "severity_level" not in kwargs:
             kwargs["severity_level"] = self.severity_level
-        task = Task(task, **kwargs)
-        r = task.start(self.host, self.nornir)
-        self.results.append(r[0] if len(r) == 1 else r)
+        t = Task(task, **kwargs)
+        r = t.start(self.host, self.nornir)
+        self.results.extend(r)
 
         if r.failed:
             # Without this we will keep running the grouped task
-            raise NornirSubTaskError(task=task, result=r)
+            raise NornirSubTaskError(task=t, result=r)
 
         return r
 
@@ -129,7 +139,9 @@ class Task(object):
         """
         Returns whether current task is a dry_run or not.
         """
-        return override if override is not None else self.nornir.data.dry_run
+        return cast(
+            bool, override if override is not None else self.nornir.data.dry_run
+        )
 
 
 class Result(object):
@@ -157,7 +169,7 @@ class Result(object):
 
     def __init__(
         self,
-        host: "Host",
+        host: Optional["Host"],
         result: Any = None,
         changed: bool = False,
         diff: str = "",
@@ -181,10 +193,10 @@ class Result(object):
         for k, v in kwargs.items():
             setattr(self, k, v)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '{}: "{}"'.format(self.__class__.__name__, self.name)
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.exception:
             return str(self.exception)
 
@@ -192,32 +204,32 @@ class Result(object):
             return str(self.result)
 
 
-class AggregatedResult(dict):
+class MultiResult(List[Result]):
     """
-    It basically is a dict-like object that aggregates the results for all devices.
-    You can access each individual result by doing ``my_aggr_result["hostname_of_device"]``.
+    It is basically is a list-like object that gives you access to the results of all subtasks for
+    a particular device/task.
     """
 
-    def __init__(self, name, **kwargs):
+    def __init__(self, name: str) -> None:
         self.name = name
-        super().__init__(**kwargs)
 
-    def __repr__(self):
-        return "{} ({}): {}".format(
-            self.__class__.__name__, self.name, super().__repr__()
-        )
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self[0], name)
 
-    @property
-    def failed(self):
-        """If ``True`` at least a host failed."""
-        return any([h.failed for h in self.values()])
+    def __repr__(self) -> str:
+        return "{}: {}".format(self.__class__.__name__, super().__repr__())
 
     @property
-    def failed_hosts(self):
-        """Hosts that failed during the execution of the task."""
-        return {h: r for h, r in self.items() if r.failed}
+    def failed(self) -> bool:
+        """If ``True`` at least a task failed."""
+        return any([h.failed for h in self])
 
-    def raise_on_error(self):
+    @property
+    def changed(self) -> bool:
+        """If ``True`` at least a task changed the system."""
+        return any([h.changed for h in self])
+
+    def raise_on_error(self) -> None:
         """
         Raises:
             :obj:`nornir.core.exceptions.NornirExecutionError`: When at least a task failed
@@ -226,32 +238,32 @@ class AggregatedResult(dict):
             raise NornirExecutionError(self)
 
 
-class MultiResult(list):
+class AggregatedResult(Dict[Hostname, MultiResult]):
     """
-    It is basically is a list-like object that gives you access to the results of all subtasks for
-    a particular device/task.
+    It basically is a dict-like object that aggregates the results for all devices.
+    You can access each individual result by doing ``my_aggr_result["hostname_of_device"]``.
     """
 
-    def __init__(self, name):
+    def __init__(self, name: str, **kwargs: Any) -> None:
         self.name = name
+        super().__init__(**kwargs)
 
-    def __getattr__(self, name):
-        return getattr(self[0], name)
-
-    def __repr__(self):
-        return "{}: {}".format(self.__class__.__name__, super().__repr__())
-
-    @property
-    def failed(self):
-        """If ``True`` at least a task failed."""
-        return any([h.failed for h in self])
+    def __repr__(self) -> str:
+        return "{} ({}): {}".format(
+            self.__class__.__name__, self.name, super().__repr__()
+        )
 
     @property
-    def changed(self):
-        """If ``True`` at least a task changed the system."""
-        return any([h.changed for h in self])
+    def failed(self) -> bool:
+        """If ``True`` at least a host failed."""
+        return any([h.failed for h in self.values()])
 
-    def raise_on_error(self):
+    @property
+    def failed_hosts(self) -> Dict[Hostname, MultiResult]:
+        """Hosts that failed during the execution of the task."""
+        return {h: r for h, r in self.items() if r.failed}
+
+    def raise_on_error(self) -> None:
         """
         Raises:
             :obj:`nornir.core.exceptions.NornirExecutionError`: When at least a task failed

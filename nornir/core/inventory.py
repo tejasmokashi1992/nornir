@@ -1,6 +1,17 @@
 import warnings
-from collections import UserList
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import (
+    Any,
+    Dict,
+    ItemsView,
+    Iterator,
+    KeysView,
+    List,
+    Optional,
+    Set,
+    Union,
+    ValuesView,
+    cast,
+)
 
 from nornir.core import deserializer
 from nornir.core.configuration import Config
@@ -25,33 +36,38 @@ class BaseAttributes(object):
         self.password = password
         self.platform = platform
 
-    def dict(self):
+    def dict(self) -> Dict[str, Any]:
         w = f"{self.dict.__qualname__} is deprecated, use nornir.core.deserializer instead"
         warnings.warn(w)
-        return (
-            getattr(deserializer.inventory, self.__class__.__name__)
-            .serialize(self)
-            .dict()
+        return cast(
+            Dict[str, Any],
+            (
+                getattr(deserializer.inventory, self.__class__.__name__)
+                .serialize(self)
+                .dict()
+            ),
         )
 
 
 class ConnectionOptions(BaseAttributes):
     __slots__ = ("extras",)
 
-    def __init__(self, extras: Optional[Dict[str, Any]] = None, **kwargs) -> None:
+    def __init__(self, extras: Optional[Dict[str, Any]] = None, **kwargs: Any) -> None:
         self.extras = extras
         super().__init__(**kwargs)
 
 
-class ParentGroups(UserList):
+class ParentGroups(List[str]):
     __slots__ = "refs"
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.refs: List["Group"] = kwargs.get("refs", [])
+    def __init__(
+        self, groups: Optional[List[str]] = None, refs: Optional[List["Group"]] = None
+    ) -> None:
+        super().__init__(groups or [])
+        self.refs: List["Group"] = refs or []
 
-    def __contains__(self, value) -> bool:
-        return value in self.data or value in self.refs
+    def __contains__(self, value: Any) -> bool:
+        return super().__contains__(value) or value in self.refs
 
 
 class InventoryElement(BaseAttributes):
@@ -59,10 +75,10 @@ class InventoryElement(BaseAttributes):
 
     def __init__(
         self,
-        groups: Optional[ParentGroups] = None,
+        groups: Optional["ParentGroups"] = None,
         data: Optional[Dict[str, Any]] = None,
         connection_options: Optional[Dict[str, ConnectionOptions]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         self.groups = groups or ParentGroups()
         self.data = data or {}
@@ -77,7 +93,7 @@ class Defaults(BaseAttributes):
         self,
         data: Optional[Dict[str, Any]] = None,
         connection_options: Optional[Dict[str, ConnectionOptions]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         self.data = data or {}
         self.connection_options = connection_options or {}
@@ -88,14 +104,14 @@ class Host(InventoryElement):
     __slots__ = ("name", "connections", "defaults")
 
     def __init__(
-        self, name: str, defaults: Optional[Defaults] = None, **kwargs
+        self, name: str, defaults: Optional[Defaults] = None, **kwargs: Any
     ) -> None:
         self.name = name
         self.defaults = defaults or Defaults()
         self.connections: Connections = Connections()
         super().__init__(**kwargs)
 
-    def _resolve_data(self):
+    def _resolve_data(self) -> Dict[str, Any]:
         processed = []
         result = {}
         for k, v in self.data.items():
@@ -112,22 +128,22 @@ class Host(InventoryElement):
                 result[k] = v
         return result
 
-    def keys(self):
+    def keys(self) -> KeysView[str]:
         """Returns the keys of the attribute ``data`` and of the parent(s) groups."""
         return self._resolve_data().keys()
 
-    def values(self):
+    def values(self) -> ValuesView[Any]:
         """Returns the values of the attribute ``data`` and of the parent(s) groups."""
         return self._resolve_data().values()
 
-    def items(self):
+    def items(self) -> ItemsView[str, Any]:
         """
         Returns all the data accessible from a device, including
         the one inherited from parent groups
         """
         return self._resolve_data().items()
 
-    def has_parent_group(self, group):
+    def has_parent_group(self, group: Union[str, "Group"]) -> bool:
         """Retuns whether the object is a child of the :obj:`Group` ``group``"""
         if isinstance(group, str):
             return self._has_parent_group_by_name(group)
@@ -135,17 +151,19 @@ class Host(InventoryElement):
         else:
             return self._has_parent_group_by_object(group)
 
-    def _has_parent_group_by_name(self, group):
+    def _has_parent_group_by_name(self, group: str) -> bool:
         for g in self.groups.refs:
             if g.name == group or g.has_parent_group(group):
                 return True
+        return False
 
-    def _has_parent_group_by_object(self, group):
+    def _has_parent_group_by_object(self, group: "Group") -> bool:
         for g in self.groups.refs:
             if g is group or g.has_parent_group(group):
                 return True
+        return False
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: str) -> Any:
         try:
             return self.data[item]
 
@@ -163,7 +181,7 @@ class Host(InventoryElement):
 
             raise
 
-    def __getattribute__(self, name):
+    def __getattribute__(self, name: str) -> Any:
         if name not in ("hostname", "port", "username", "password", "platform"):
             return object.__getattribute__(self, name)
         v = object.__getattribute__(self, name)
@@ -177,25 +195,25 @@ class Host(InventoryElement):
         else:
             return v
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return bool(self.name)
 
-    def __setitem__(self, item, value):
+    def __setitem__(self, item: str, value: Any) -> None:
         self.data[item] = value
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._resolve_data().keys())
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         return self.data.__iter__()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "{}: {}".format(self.__class__.__name__, self.name or "")
 
-    def get(self, item, default=None):
+    def get(self, item: str, default: Any = None) -> Any:
         """
         Returns the value ``item`` from the host or hosts group variables.
 

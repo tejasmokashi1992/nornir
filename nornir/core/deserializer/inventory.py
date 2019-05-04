@@ -56,7 +56,7 @@ class InventoryElement(BaseAttributes):
         connection_options: Optional[Dict[str, ConnectionOptions]] = None,
         defaults: inventory.Defaults = None,
     ) -> Dict[str, Any]:
-        parent_groups = inventory.ParentGroups(groups)
+        parent_groups = inventory.ParentGroups(groups or [])
         connection_options = connection_options or {}
         conn_opts = {
             k: inventory.ConnectionOptions(**v) for k, v in connection_options.items()
