@@ -12,6 +12,8 @@ from .netmiko_send_command import netmiko_send_command
 from .netmiko_send_config import netmiko_send_config
 from .netmiko_save_config import netmiko_save_config
 from .tcp_ping import tcp_ping
+from .napalm_ping import napalm_ping
+from .napalm_traceroute import napalm_traceroute
 
 __all__ = (
     "napalm_cli",
@@ -28,4 +30,6 @@ __all__ = (
     "netmiko_send_config",
     "netmiko_save_config",
     "tcp_ping",
+    "napalm_ping",
+    "napalm_traceroute"
 )
